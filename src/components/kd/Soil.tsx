@@ -7,6 +7,11 @@ export function Soil() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ".root-path",
@@ -14,38 +19,45 @@ export function Soil() {
         {
           strokeDashoffset: 0,
           ease: "power1.inOut",
+          force3D: true,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
             end: "bottom bottom",
-            scrub: true,
+            scrub: isMobile ? 0.5 : true,
           },
         },
       );
-      gsap.to(".lifeblood-node", {
-        scale: 1.6,
-        opacity: 0.45,
-        transformOrigin: "center",
-        duration: 1.6,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: 0.35,
-      });
-      gsap.to(".blood-vein", {
-        opacity: 0.95,
-        duration: 2.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: 0.6,
-      });
-      gsap.to(".blood-seep", {
-        strokeDashoffset: -180,
-        duration: 9,
-        repeat: -1,
-        ease: "none",
-      });
+
+      if (!prefersReducedMotion && !isMobile) {
+        gsap.to(".lifeblood-node", {
+          scale: 1.5,
+          opacity: 0.45,
+          transformOrigin: "center",
+          duration: 1.6,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          stagger: 0.35,
+          force3D: true,
+        });
+        gsap.to(".blood-vein", {
+          opacity: 0.95,
+          duration: 2.8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          stagger: 0.6,
+          force3D: true,
+        });
+        gsap.to(".blood-seep", {
+          strokeDashoffset: -180,
+          duration: 9,
+          repeat: -1,
+          ease: "none",
+          force3D: true,
+        });
+      }
     }, sectionRef);
     return () => ctx.revert();
   }, []);

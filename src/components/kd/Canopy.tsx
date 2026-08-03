@@ -19,43 +19,64 @@ export function Canopy() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
       gsap.from(".canopy-reveal", {
-        y: 40,
+        y: 30,
         opacity: 0,
-        duration: 1.2,
-        stagger: 0.15,
+        duration: 1,
+        stagger: 0.12,
         ease: "power3.out",
+        force3D: true,
       });
-      gsap.utils.toArray<HTMLElement>(".hadida-bird").forEach((bird) => {
-        gsap.to(bird, {
-          x: "125vw",
-          y: "random(-50, 50)",
-          duration: Number(bird.dataset["dur"] ?? 26),
-          delay: Number(bird.dataset["delay"] ?? 0),
-          repeat: -1,
-          ease: "none",
+
+      if (!prefersReducedMotion) {
+        gsap.utils.toArray<HTMLElement>(".hadida-bird").forEach((bird, idx) => {
+          // On mobile, skip animating half the birds to save GPU/CPU memory
+          if (isMobile && idx % 2 === 1) {
+            bird.style.display = "none";
+            return;
+          }
+          gsap.to(bird, {
+            x: "125vw",
+            y: "random(-40, 40)",
+            duration: Number(bird.dataset["dur"] ?? 26),
+            delay: Number(bird.dataset["delay"] ?? 0),
+            repeat: -1,
+            ease: "none",
+            force3D: true,
+          });
         });
-      });
-      /* Wing flap — wings rotate about the body, birds keep gliding. */
-      gsap.to(".hadida-wing-left", {
-        rotate: -34,
-        transformOrigin: "100% 100%",
-        duration: 0.42,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: { each: 0.13, from: "random" },
-      });
-      gsap.to(".hadida-wing-right", {
-        rotate: 34,
-        transformOrigin: "0% 100%",
-        duration: 0.42,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: { each: 0.13, from: "random" },
-      });
+
+        if (!isMobile) {
+          /* Wing flap — rotate wings on desktop only */
+          gsap.to(".hadida-wing-left", {
+            rotate: -34,
+            transformOrigin: "100% 100%",
+            duration: 0.42,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            force3D: true,
+            stagger: { each: 0.13, from: "random" },
+          });
+          gsap.to(".hadida-wing-right", {
+            rotate: 34,
+            transformOrigin: "0% 100%",
+            duration: 0.42,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            force3D: true,
+            stagger: { each: 0.13, from: "random" },
+          });
+        }
+      }
     }, sectionRef);
     return () => ctx.revert();
   }, []);

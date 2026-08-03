@@ -29,24 +29,34 @@ export function River() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
-      gsap.to(".river-current", {
-        strokeDashoffset: -1200,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
+      if (!prefersReducedMotion) {
+        gsap.to(".river-current", {
+          strokeDashoffset: isMobile ? -600 : -1200,
+          ease: "none",
+          force3D: true,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: isMobile ? 0.5 : 1,
+          },
+        });
+      }
+
       gsap.from(".river-stage", {
-        y: 60,
+        y: isMobile ? 30 : 60,
         opacity: 0,
-        duration: 0.9,
+        duration: isMobile ? 0.6 : 0.9,
         ease: "power3.out",
-        stagger: 0.2,
-        scrollTrigger: { trigger: sectionRef.current, start: "top 70%" },
+        stagger: 0.15,
+        force3D: true,
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
       });
     }, sectionRef);
     return () => ctx.revert();
@@ -59,24 +69,24 @@ export function River() {
       aria-labelledby="river-heading"
       className="relative overflow-hidden bg-cream-deep px-6 py-28 md:py-36"
     >
-      {/* River — far/back layer: hazier and thinner, reading as distance */}
-      <div className="pointer-events-none absolute inset-0 z-0 scale-[0.97] opacity-70 blur-[2px]">
+      {/* River — far/back layer */}
+      <div className="pointer-events-none absolute inset-0 z-0 scale-[0.97] opacity-60 hidden md:block blur-[1px]">
         <RiverSvg depth="far" />
       </div>
 
-      {/* River — mid layer: the main body of water */}
+      {/* River — mid layer: main water body */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <RiverSvg />
       </div>
 
-      {/* The tree stock the river winds in front of, beside the heading */}
+      {/* Tree stock behind heading */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-10 z-10 h-40 w-10 -translate-x-1/2 rounded-t-[3rem] bg-bark/20 blur-[3px] md:h-52 md:w-14"
+        className="pointer-events-none absolute left-1/2 top-10 z-10 h-40 w-10 -translate-x-1/2 rounded-t-[3rem] bg-bark/20 blur-[2px] md:h-52 md:w-14"
       />
 
-      {/* River — front layer: crosses in front of the stock and the cards */}
-      <div className="pointer-events-none absolute inset-0 z-20 drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)]">
+      {/* River — front layer: optimized for mobile GPU */}
+      <div className="pointer-events-none absolute inset-0 z-20 md:drop-shadow-[0_10px_18px_rgba(0,0,0,0.15)]">
         <RiverSvg front />
       </div>
 
